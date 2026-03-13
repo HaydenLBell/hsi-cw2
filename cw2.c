@@ -203,12 +203,17 @@ void readSeq(int *seq, int seqlen, int val) {
 /* Interface fcts on top of the low-level pin I/O code                         */
 
 /* 
-   Blink @led@ @c@ times
+   Blink "led" "c" times
 */
-void blinkN(volatile uint32_t *gpio, int led, int c) { 
-  /* ***************************************************************************** */
-  /* COMPLETE THIS CODE */
-  /* ***************************************************************************** */
+void blinkN(volatile uint32_t *gpio, int led, int c) {
+
+  for (int i = 0; i < c; i++) {
+    write_LED(gpio, led, 1);
+    usleep(300000);   // On for 300ms.
+    write_LED(gpio, led, 0);
+    usleep(300000);   // Off for 300ms.
+  }
+
 }
 
 /* 
@@ -479,6 +484,10 @@ int main(int argc, char **argv){
   // -----------------------------------------------------------------------------
   // Setting mode of pins
 
+  pin_mode(gpio, pinLED,    OUTPUT);  // green LED
+  pin_mode(gpio, pinLED2,   OUTPUT);  // red LED
+  pin_mode(gpio, pinButton, INPUT);   // button
+
   /* ***************************************************************************** */
   /* COMPLETE THIS CODE */
   /* Set the mode for the pins here, using the low-level functions in lcd-binary.c */
@@ -548,17 +557,54 @@ int main(int argc, char **argv){
   // PHASE 1: sequence input
 
   // ...........................................................................
-  // Iterate over all elements of the sequence
-  for (int i=0; i<seqlen; i++) {
+  // Iterate over all elements of the sequence.
+  for (int i = 0; i < seqlen; i++) {
 
-      /* ***************************************************************************** */
-      /* COMPLETE THIS CODE (replace existing code)                                    */
-      /* Complete the body of the loop, reading button presses to input numbers        */
-      /* using interval timers for timeout                                             */
-      /* and filling in a sequence with the input values                               */
-      /* ***************************************************************************** */
-    printf("body of input loop not implemeneted; should call read_button and check for value of buttonPressed: current value: %d\n", buttonPressed);
+    int count = 0;
+    timed_out = 0;
+
+    // Wait for first press before starting timer.
+    while(read_button(gpio, pinButton) == 0);
+
+    // now start counting presses with timeout
+    initITimer(500000);  // 0.5 second timeout
+
+    while (!timed_out) {
+      int state = read_button(gpio, pinButton);
+      if (state == 1) {
+        write_LED(gpio, pinLED, 1);   // green on while pressed
+        // wait for release
+        while (read_button(gpio, pinButton) == 1);
+        write_LED(gpio, pinLED, 0);   // green off on release
+        count++;
+        // restart the timer on each press
+        timed_out = 0;
+        initITimer(500000);
+      }
+    }
+
+    // validate range
+    if (count < 1 || count > digits) {
+      fprintf(stderr, "Error: value %d out of range (1-%d)\n", count, digits);
+      exit(EXIT_FAILURE);
+    }
+
+    // allocate attemptSeq on first iteration
+    if (i == 0) {
+      attemptSeq = (int *)malloc(seqlen * sizeof(int));
+      if (attemptSeq == NULL) {
+        fprintf(stderr, "Error: malloc failed\n");
+        exit(EXIT_FAILURE);
+      }
+    }
+
+    attemptSeq[i] = count;
+
+    blinkN(gpio, pinLED2, 1);         // red blinks once: acknowledge
+    blinkN(gpio, pinLED,  count);     // green blinks N times: echo
   }
+
+  blinkN(gpio, pinLED2, 2);           // red blinks twice: end of sequence
   
     // -------------------------------------------------------
     // PHASE 2: Main Task: full search
