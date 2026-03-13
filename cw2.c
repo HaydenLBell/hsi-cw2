@@ -247,10 +247,13 @@ void write_LED(volatile uint32_t *gpio, int pin, int value) {
   The final version of the code should use the Assembler version in file hamming.s
 */
 int hamming(const int *x, const int *y, int seqlen) {
-  /* ***************************************************************************** */
-  /* COMPLETE THIS CODE (C version is OPTIONAL, but you need an implementation of hamming() */
-  /* ***************************************************************************** */
-  fprintf(stderr, "hamming: still needs to be implemented\n");
+  int hammingDistance = 0;
+  for (int i = 0; i < seqlen; i++) {
+    if (x[i] != y[i]) {
+      hammingDistance += 1;
+    }
+  }
+  return hammingDistance;
 }
 #endif
 
