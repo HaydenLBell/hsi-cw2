@@ -45,23 +45,46 @@ void pin_mode(volatile uint32_t *gpio, int pin, int mode)
   Hardware Interface function.
   Send a @value@ along pin number @pin@. Values should be LOW or HIGH (encoded as int).
 */
-void digital_write (volatile uint32_t *gpio, int pin, int value)
+void digital_write(volatile uint32_t *gpio, int pin, int value)
 {
-  /* ***************************************************************************** */
-  /* COMPLETE THIS CODE */
-  /* ***************************************************************************** */
+  // offset 7 = GPSET0, offset 10 = GPCLR0
+  int offset = (value == HIGH) ? 7 : 10;
 
+  __asm__ volatile(
+    "LDR R2, %[gpio_base]    \n\t"  // R2 = gpio base address.
+    "MOV R3, #1              \n\t"  // R3 = 1.
+    "MOV R4, %[pin]          \n\t"  // R4 = pin number.
+    "LSL R3, R3, R4          \n\t"  // R3 = 1 << pin (bitmask).
+    "MOV R4, %[offset]       \n\t"  // R4 = SET or CLR offset.
+    "STR R3, [R2, R4, LSL#2] \n\t"  // write bitmask to SET/CLR register.
+    :
+    : [gpio_base] "m" (*gpio),
+      [pin]       "r" (pin),
+      [offset]    "r" (offset)
+    : "r2", "r3", "r4"
+  );
 }
 
 /*
   Hardware Interface function.
   Read input from a button device connected to pin @button@.. Result can be LOW or HIGH (encoded as int).
 */
-int read_button(volatile uint32_t *gpio, int button) {
-  /* ***************************************************************************** */
-  /* COMPLETE THIS CODE */
-  /* ***************************************************************************** */
-  // fill in your code and replace the return statement below with the value read from the button
-  return LOW;
-}
+int read_button(volatile uint32_t *gpio, int button)
+{
+  int result = 0;
 
+  __asm__ volatile(
+    "LDR R2, %[gpio_base]    \n\t"  // R2 = gpio base address.
+    "MOV R3, #13             \n\t"  // R3 = GPLEV0 offset (13).
+    "LDR R4, [R2, R3, LSL#2] \n\t"  // R4 = value of GPLEV0 register.
+    "MOV R3, %[button]       \n\t"  // R3 = button pin number.
+    "LSR R4, R4, R3          \n\t"  // shift right by pin number.
+    "AND %[result], R4, #1   \n\t"  // mask lowest bit = pin state.
+    : [result] "=r" (result)
+    : [gpio_base] "m" (*gpio),
+      [button]    "r" (button)
+    : "r2", "r3", "r4"
+  );
+
+  return result;
+}
