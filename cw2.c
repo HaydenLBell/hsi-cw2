@@ -493,19 +493,11 @@ int main(int argc, char **argv){
   pin_mode(gpio, pinLED,    OUTPUT);  // green LED
   pin_mode(gpio, pinLED2,   OUTPUT);  // red LED
   pin_mode(gpio, pinButton, INPUT);   // button
-
-  /* ***************************************************************************** */
-  /* COMPLETE THIS CODE */
-  /* Set the mode for the pins here, using the low-level functions in lcd-binary.c */
-  /* ***************************************************************************** */
   
   // -----------------------------------------------------------------------------
   // Initialise the LCD display
 
-  /* ***************************************************************************** */
-  /* COMPLETE THIS CODE */
-  /* Initialise the LCD display */
-  /* ***************************************************************************** */
+  lcd_init(gpio);
 
 
   if (opt_l) { // TESTING only: show some text on the LCD display to demonstrate it's working in principle
