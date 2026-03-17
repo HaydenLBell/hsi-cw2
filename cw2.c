@@ -264,10 +264,9 @@ int hamming(const int *x, const int *y, int seqlen) {
   Show the Hamming distance (of @seq1@ and @seq2@) in @code@ on the terminal.
 */
 void showHamm(int code, const int *seq1, const int *seq2) {
-  /* ***************************************************************************** */
-  /* COMPLETE THIS CODE */
-  /* ***************************************************************************** */
-  fprintf(stderr, "showHamm: still needs to be implemented\n");
+
+  printf("Hamming distance:\n%d\n", code);
+
 }
 
 /* 
@@ -493,19 +492,11 @@ int main(int argc, char **argv){
   pin_mode(gpio, pinLED,    OUTPUT);  // green LED
   pin_mode(gpio, pinLED2,   OUTPUT);  // red LED
   pin_mode(gpio, pinButton, INPUT);   // button
-
-  /* ***************************************************************************** */
-  /* COMPLETE THIS CODE */
-  /* Set the mode for the pins here, using the low-level functions in lcd-binary.c */
-  /* ***************************************************************************** */
   
   // -----------------------------------------------------------------------------
   // Initialise the LCD display
 
-  /* ***************************************************************************** */
-  /* COMPLETE THIS CODE */
-  /* Initialise the LCD display */
-  /* ***************************************************************************** */
+  lcd_init(gpio);
 
 
   if (opt_l) { // TESTING only: show some text on the LCD display to demonstrate it's working in principle
@@ -550,27 +541,26 @@ int main(int argc, char **argv){
   
   /* Print Greetings Message on LCD display */
   
-  // First 5 letters of surname.
-  const char *surname = "KYNOC"; // lol bell is too short.
+  // first 5 letters of surname. Bell doesnt fit...
+  const char *surname = "KYNOC";
 
   // Blink LEDs for each letter. Red = consonant, green = vowel.
   for (int i = 0; i < 5; i++) {
-  char c = surname[i];
+      char c = surname[i];
 
-    // check if vowel
-    if (c == 'A' || c == 'E' || c == 'I' || c == 'O' || c == 'U') {
-        blinkN(gpio, pinLED, 1);   // Blink green.
-    } else {
-        blinkN(gpio, pinLED2, 1);  // Blink red.
-    }
+      // check if vowel
+      if (c == 'A' || c == 'E' || c == 'I' || c == 'O' || c == 'U') {
+          blinkN(gpio, pinLED, 1);   // green = vowel
+      } else {
+          blinkN(gpio, pinLED2, 1);  // red = consonant
+      }
 
-    usleep(300000);  // pause between letters
+      usleep(300000);  // pause between letters.
   }
 
-  // Show surname on LCD display
+  // show surname on LCD display.
   lcd_clear(gpio);
   lcd_write_row(gpio, 0, surname);
-
 
   /* OPTIONAL: wait for ENTER key before continuing */
   waitForEnter () ; // -------------------------------------------------------
@@ -655,12 +645,19 @@ int main(int argc, char **argv){
     // time-stamp
     startTime = clock();
 
-    /* ***************************************************************************** */
-    /* COMPLETE THIS CODE                                                            */
-    /* implement a check of the Hamming distance of the input and secret sequence    */
-    /* then search for the secret sequence and report where it was found             */
-    /* with -r option, the commandline sequence should be used as input sequence     */
-    /* ***************************************************************************** */
+    // Use refSeq if provided via -r, otherwise use attemptSeq.
+    int *inputSeq;
+
+    // Could possible swap out for ternary.
+    if (opt_r) {
+        inputSeq = refSeq;
+    } else {
+        inputSeq = attemptSeq;
+    }
+
+    code = hamming(theSeq, inputSeq, seqlen);
+    printf("Hamming distance between input and secret: %d\n", code);
+    showHamm(code, theSeq, inputSeq);
 
     stopTime = clock();
 
@@ -671,10 +668,8 @@ int main(int argc, char **argv){
     printf("Secret sequence was: ");
     showSeq(theSeq,seqlen);
 
-  /* ***************************************************************************** */
-  /* COMPLETE THIS CODE                                                            */
-  /* write an exit message to the LCD display                                      */
-  /* ***************************************************************************** */
+  lcd_clear(gpio);
+  lcd_write_row(gpio, 0, "BYE!");
 
   free(theSeq);
   free(refSeq);
