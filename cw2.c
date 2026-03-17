@@ -639,12 +639,19 @@ int main(int argc, char **argv){
     // time-stamp
     startTime = clock();
 
-    /* ***************************************************************************** */
-    /* COMPLETE THIS CODE                                                            */
-    /* implement a check of the Hamming distance of the input and secret sequence    */
-    /* then search for the secret sequence and report where it was found             */
-    /* with -r option, the commandline sequence should be used as input sequence     */
-    /* ***************************************************************************** */
+    // Use refSeq if provided via -r, otherwise use attemptSeq.
+    int *inputSeq;
+
+    // Could possible swap out for ternary.
+    if (opt_r) {
+        inputSeq = refSeq;
+    } else {
+        inputSeq = attemptSeq;
+    }
+
+    code = hamming(theSeq, inputSeq, seqlen);
+    printf("Hamming distance between input and secret: %d\n", code);
+    showHamm(code, theSeq, inputSeq);
 
     stopTime = clock();
 
@@ -655,10 +662,8 @@ int main(int argc, char **argv){
     printf("Secret sequence was: ");
     showSeq(theSeq,seqlen);
 
-  /* ***************************************************************************** */
-  /* COMPLETE THIS CODE                                                            */
-  /* write an exit message to the LCD display                                      */
-  /* ***************************************************************************** */
+  lcd_clear(gpio);
+  lcd_write_row(gpio, 0, "BYE!");
 
   free(theSeq);
   free(refSeq);
