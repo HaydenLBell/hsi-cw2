@@ -265,13 +265,8 @@ int hamming(const int *x, const int *y, int seqlen) {
 */
 void showHamm(int code, const int *seq1, const int *seq2) {
 
-<<<<<<< HEAD
-  printf("Hamming distance:\n%d\n", code);
-
-=======
   printf("Hamming distance:\n%d", code);
   
->>>>>>> 4bc85a7 (Created: backup)
 }
 
 /* 
@@ -650,17 +645,10 @@ int main(int argc, char **argv){
     // time-stamp
     startTime = clock();
 
-<<<<<<< HEAD
     // Use refSeq if provided via -r, otherwise use attemptSeq.
     int *inputSeq;
 
     // Could possible swap out for ternary.
-=======
-    // use refSeq if provided via -r, otherwise use attemptSeq
-    int *inputSeq;
-
-    // Could make this ternary for cleaner code.
->>>>>>> 4bc85a7 (Created: backup)
     if (opt_r) {
         inputSeq = refSeq;
     } else {
@@ -681,11 +669,7 @@ int main(int argc, char **argv){
     showSeq(theSeq,seqlen);
 
   lcd_clear(gpio);
-<<<<<<< HEAD
   lcd_write_row(gpio, 0, "BYE!");
-=======
-  lcd_write_row(gpio, 0, "Byeee!");
->>>>>>> 4bc85a7 (Created: backup)
 
   free(theSeq);
   free(refSeq);
