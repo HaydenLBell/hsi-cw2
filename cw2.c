@@ -543,9 +543,27 @@ int main(int argc, char **argv){
   // -----------------------------------------------------------------------------
   
   /* Print Greetings Message on LCD display */
-  /* ***************************************************************************** */
-  /* COMPLETE THIS CODE */
-  /* ***************************************************************************** */
+  
+  // first 5 letters of surname. Bell doesnt fit...
+  const char *surname = "KYNOC";
+
+  // Blink LEDs for each letter. Red = consonant, green = vowel.
+  for (int i = 0; i < 5; i++) {
+      char c = surname[i];
+
+      // check if vowel
+      if (c == 'A' || c == 'E' || c == 'I' || c == 'O' || c == 'U') {
+          blinkN(gpio, pinLED, 1);   // green = vowel
+      } else {
+          blinkN(gpio, pinLED2, 1);  // red = consonant
+      }
+
+      usleep(300000);  // pause between letters.
+  }
+
+  // show surname on LCD display.
+  lcd_clear(gpio);
+  lcd_write_row(gpio, 0, surname);
 
   /* OPTIONAL: wait for ENTER key before continuing */
   waitForEnter () ; // -------------------------------------------------------
