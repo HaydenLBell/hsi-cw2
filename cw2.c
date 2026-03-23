@@ -324,13 +324,13 @@ int main(int argc, char **argv){
   // variables holding Pin numbers for LEDs and button
   int pinLED = LED, pinLED2 = LED2, pinButton = BUTTON;
   // int fSel, shift, pin,  clrOff, setOff, off, res;
-  int   fd ;
+  int fd;
 
   // strings for temporary usage (e.g. writing to LCD display)
   // char str1[32];
   // char str2[32];
 
-  // useful for interval timers					    
+  // useful for interval timers
   // struct timeval t1, t2 ;
 
   // variables for command-line processing
@@ -340,7 +340,7 @@ int main(int argc, char **argv){
   // variables derived from command line options
   bool verbose = false, help = false, debug = false, unit_test = false;
   int submitDelay = SUBMIT_DELAY;
-  
+
   // -------------------------------------------------------
   // process command-line arguments
 
@@ -350,52 +350,52 @@ int main(int argc, char **argv){
     while ((opt = getopt(argc, argv, "hvdeluS:s:r:m:n:")) != -1) {
       switch (opt) {
       case 'v':
-	verbose = true;
-	break;
+        verbose = true;
+        break;
       case 'h':
-	help = true;
-	break;
+        help = true;
+        break;
       case 'd':
-	debug = true;
-	break;
+        debug = true;
+        break;
       case 'e':
-	opt_e = true;
-	break;
+        opt_e = true;
+        break;
       case 'l': // LCD test only
-	opt_l = true;
-	break;
+        opt_l = true;
+        break;
       case 'u':
-	unit_test = true;
-	break;
+        unit_test = true;
+        break;
       case 'S':
-	opt_S = atoi(optarg);
-	submitDelay = opt_S;
-	break;
+        opt_S = atoi(optarg);
+        submitDelay = opt_S;
+        break;
       case 's':
-	opt_s = atoi(optarg); 
-	break;
+        opt_s = atoi(optarg);
+        break;
       case 'r':
-	opt_r = atoi(optarg); 
-	break;
+        opt_r = atoi(optarg);
+        break;
       case 'm':
-	opt_m = atoi(optarg);
-	digits = opt_m;
-	break;
+        opt_m = atoi(optarg);
+        digits = opt_m;
+        break;
       case 'n':
-	opt_n = atoi(optarg);
-	seqlen = opt_n;
-	break;
+        opt_n = atoi(optarg);
+        seqlen = opt_n;
+        break;
       default: /* '?' */
-	fprintf(stderr, "Usage: %s [-h] [-v] [-d] [-e] [-m <maxval> ] [-n <seqlen>] [-u <seq1> <seq2>] [-s <secret seq>] [-r <reference seq>]  \n", argv[0]);
-	exit(EXIT_FAILURE);
+        fprintf(stderr, "Usage: %s [-h] [-v] [-d] [-e] [-m <maxval> ] [-n <seqlen>] [-u <seq1> <seq2>] [-s <secret seq>] [-r <reference seq>]  \n", argv[0]);
+        exit(EXIT_FAILURE);
       }
     }
   }
 
   if (help) {
-    fprintf(stderr, "pinCrack program, running on a Raspberry Pi, with connected LED, button and LCD display\n"); 
-    fprintf(stderr, "Use the button for input of numbers. The LCD display will show the matches with the secret sequence.\n"); 
-    fprintf(stderr, "For full specification of the program see: https://www.macs.hw.ac.uk/~hwloidl/Courses/F28HS/F28HS_CW2_2026.pdf\n"); 
+    fprintf(stderr, "pinCrack program, running on a Raspberry Pi, with connected LED, button and LCD display\n");
+    fprintf(stderr, "Use the button for input of numbers. The LCD display will show the matches with the secret sequence.\n");
+    fprintf(stderr, "For full specification of the program see: https://www.macs.hw.ac.uk/~hwloidl/Courses/F28HS/F28HS_CW2_2026.pdf\n");
     fprintf(stderr, "Usage: %s [-h] [-v] [-d] [-e] [-u <seq1> <seq2>] [-s <secret seq>] [-r <reference seq>]  \n", argv[0]);
     exit(EXIT_SUCCESS);
   }
@@ -407,14 +407,14 @@ int main(int argc, char **argv){
     printf("Unittest is %s\n", (unit_test ? "ON" : "OFF"));
     printf("Exhaustive search is %s\n", (opt_e ? "ON" : "OFF"));
     printf("Submit delay is %d\n", submitDelay);
-    if (opt_s)  printf("Secret sequence set to %d\n", opt_s);
-    if (opt_r)  printf("Reference sequence set to %d\n", opt_r);
+    if (opt_s) printf("Secret sequence set to %d\n", opt_s);
+    if (opt_r) printf("Reference sequence set to %d\n", opt_r);
   }
 
   if (verbose) {
     printf("Hint: remember to compute the Hamming distance in each iteration and assign it to variable code; current (unused) value: %d\n", code);
     printf("Code style requirement: collect the values of the input sequence in the variable attemptSeq; current (unused) value: %p\n", attemptSeq);
-  }  
+  }
 
   /* ***************************************************************************** */
   /* COMPLETE THIS CODE */
@@ -431,10 +431,10 @@ int main(int argc, char **argv){
     readSeq(theSeq, seqlen, opt_s);
     if (verbose) {
       fprintf(stderr, "Running program with secret sequence:\n");
-      showSeq(theSeq,seqlen);
+      showSeq(theSeq, seqlen);
     }
   }
-  
+
   if (opt_r) { // if -r option is given, use the sequence as REFERENCE sequence
     if (refSeq==NULL) {
       refSeq = calloc(seqlen, sizeof(int));
@@ -445,49 +445,49 @@ int main(int argc, char **argv){
     readSeq(refSeq, seqlen, opt_r);
     if (verbose) {
       fprintf(stderr, "Running program with reference sequence:\n");
-      showSeq(refSeq,seqlen);
+      showSeq(refSeq, seqlen);
     }
   }
-  
+
   /* --------------------------------------------------------------------------- */
   /* Configuration of the LCD display */
-  int bits, rows, cols ;
+  int bits, rows, cols;
 
   // hard-coded: 16x2 display, using a 4-bit connection
-  bits = 4; 
-  cols = 16; 
-  rows = 2; 
+  bits = 4;
+  cols = 16;
+  rows = 2;
 
-  printf ("Raspberry Pi configuration: red LED: %d; green LED: %d; button: %d\n", pinLED2, pinLED, pinButton) ;
-  printf ("Raspberry Pi LCD driver for a %dx%d display (%d-bit wiring) \n", cols, rows, bits) ;
+  printf("Raspberry Pi configuration: red LED: %d; green LED: %d; button: %d\n", pinLED2, pinLED, pinButton);
+  printf("Raspberry Pi LCD driver for a %dx%d display (%d-bit wiring) \n", cols, rows, bits);
 
   /* --------------------------------------------------------------------------- */
   /* Check for root priveleges (needed for controlling LEDs etc) */
 
-  if (geteuid () != 0) {
-    fprintf (stderr, "setup: Must be root. (Did you forget sudo?)\n") ;
+  if (geteuid() != 0) {
+    fprintf(stderr, "setup: Must be root. (Did you forget sudo?)\n");
     exit(EXIT_FAILURE);
   }
-  
+
   /* --------------------------------------------------------------------------- */
   /* constants for RPi2/3. NOTE: RPi4 needs a different base address */
   // -----------------------------------------------------------------------------
   // RPi2/3
-  gpiobase = 0x3F200000 ;
+  gpiobase = 0x3F200000;
   // RPi4
   // gpiobase = 0xFE200000 ;
 
   // -----------------------------------------------------------------------------
-  // memory mapping 
+  // memory mapping
   // Open the master /dev/memory device
 
-  if ((fd = open ("/dev/mem", O_RDWR | O_SYNC | O_CLOEXEC) ) < 0)
-    return failure (false, "setup: Unable to open /dev/mem: %s\n", strerror (errno)) ;
+  if ((fd = open("/dev/mem", O_RDWR | O_SYNC | O_CLOEXEC)) < 0)
+    return failure(false, "setup: Unable to open /dev/mem: %s\n", strerror(errno));
 
   // GPIO:
-  gpio = mmap(0, BLOCK_SIZE, PROT_READ|PROT_WRITE, MAP_SHARED, fd, gpiobase) ;
+  gpio = mmap(0, BLOCK_SIZE, PROT_READ|PROT_WRITE, MAP_SHARED, fd, gpiobase);
   if ((int32_t)gpio == -1)
-    return failure (false, "setup: mmap (GPIO) failed: %s\n", strerror (errno)) ;
+    return failure(false, "setup: mmap (GPIO) failed: %s\n", strerror(errno));
 
   // -----------------------------------------------------------------------------
   // Setting mode of pins
@@ -495,32 +495,30 @@ int main(int argc, char **argv){
   pin_mode(gpio, pinLED,    OUTPUT);  // green LED
   pin_mode(gpio, pinLED2,   OUTPUT);  // red LED
   pin_mode(gpio, pinButton, INPUT);   // button
-  
+
   // -----------------------------------------------------------------------------
   // Initialise the LCD display
 
   lcd_init(gpio);
 
-
-
-  if (opt_l) {
-      lcd_clear(gpio);
-      lcd_write_row(gpio, 0, "Hello!");
-      lcd_write_row(gpio, 1, "LCD works!");
-      sleep(5);  // keep it on screen for 5 seconds
-      exit(2);
+  if (opt_l) { // TESTING only: show some text on the LCD display to demonstrate it's working in principle
+    lcd_clear(gpio);
+    lcd_write_row(gpio, 0, "Hello!");
+    lcd_write_row(gpio, 1, "LCD works!");
+    sleep(5);
+    exit(2);
   }
 
   // -----------------------------------------------------------------------------
   // App initialisation
-  
+
   /* Initialise the secret sequence */
-  if (!opt_s)  initSeq(seqlen, digits);
+  if (!opt_s) initSeq(seqlen, digits);
 
   /* Use the debugging option like this for extra messages */
   if (debug) {
     printf("Secret sequence is: ");
-    showSeq(theSeq,seqlen);
+    showSeq(theSeq, seqlen);
   }
 
   // -----------------------------------------------------------------------------
@@ -535,41 +533,37 @@ int main(int argc, char **argv){
 
     // output to screen
     refCode = hamming(theSeq, refSeq, seqlen);
-    showSeq(theSeq,seqlen);
-    showSeq(refSeq,seqlen);
-    showHamm(refCode, theSeq, refSeq); 
+    showSeq(theSeq, seqlen);
+    showSeq(refSeq, seqlen);
+    showHamm(refCode, theSeq, refSeq);
     exit(EXIT_SUCCESS);
-  }  
+  }
 
   // -----------------------------------------------------------------------------
-  
+
   /* Print Greetings Message on LCD display */
-  
-  // first 5 letters of surname. Bell doesnt fit...
+
+  // first 5 letters of surname
   const char *surname = "KYNOC";
 
   // Blink LEDs for each letter. Red = consonant, green = vowel.
   for (int i = 0; i < 5; i++) {
-      char c = surname[i];
-
-      // check if vowel
-      if (c == 'A' || c == 'E' || c == 'I' || c == 'O' || c == 'U') {
-          blinkN(gpio, pinLED, 1);   // green = vowel
-      } else {
-          blinkN(gpio, pinLED2, 1);  // red = consonant
-      }
-
-      usleep(300000);  // pause between letters.
+    char c = surname[i];
+    if (c=='A'||c=='E'||c=='I'||c=='O'||c=='U') {
+      blinkN(gpio, pinLED, 1);   // green = vowel
+    } else {
+      blinkN(gpio, pinLED2, 1);  // red = consonant
+    }
+    usleep(300000);  // pause between letters
   }
 
-  // show surname on LCD display.
+  // show surname on LCD display
   lcd_clear(gpio);
-  //usleep(5000);        // give LCD time to clear
-  lcd_home(gpio);      // explicitly move cursor to position 0, we had an issue with this.
+  lcd_home(gpio);      // explicitly move cursor to position 0
   lcd_write_row(gpio, 0, surname);
 
   /* OPTIONAL: wait for ENTER key before continuing */
-  waitForEnter () ; // -------------------------------------------------------
+  waitForEnter(); // -------------------------------------------------------
 
   /* +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++ */
   /* Main part of the application  */
@@ -578,104 +572,186 @@ int main(int argc, char **argv){
   // PHASE 1: sequence input
 
   // ...........................................................................
-  // Iterate over all elements of the sequence.
-  if(!opt_r){
-    
+  // Iterate over all elements of the sequence
+  if (!opt_r) {
     for (int i = 0; i < seqlen; i++) {
 
-    int count = 0;
-    timed_out = 0;
+      int count = 0;
+      timed_out = 0;
 
-    // Wait for first press before starting timer.
-    while(read_button(gpio, pinButton) == 0);
+      // Wait for first press before starting timer
+      while (read_button(gpio, pinButton) == 0);
 
-    // now start counting presses with timeout
-    initITimer(500000);  // 0.5 second timeout
+      // now start counting presses with timeout
+      initITimer(500000);  // 0.5 second timeout
 
-    while (!timed_out) {
-      int state = read_button(gpio, pinButton);
-      if (state == 1) {
-        write_LED(gpio, pinLED, 1);   // green on while pressed
-        // wait for release
-        while (read_button(gpio, pinButton) == 1);
-        write_LED(gpio, pinLED, 0);   // green off on release
-        count++;
-        // restart the timer on each press
-        timed_out = 0;
-        initITimer(500000);
+      while (!timed_out) {
+        int state = read_button(gpio, pinButton);
+        if (state == 1) {
+          write_LED(gpio, pinLED, 1);   // green on while pressed
+          // wait for release
+          while (read_button(gpio, pinButton) == 1);
+          write_LED(gpio, pinLED, 0);   // green off on release
+          count++;
+          // restart the timer on each press
+          timed_out = 0;
+          initITimer(500000);
+        }
       }
-    }
 
-    // validate range
-    if (count < 1 || count > digits) {
-      fprintf(stderr, "Error: value %d out of range (1-%d)\n", count, digits);
-      exit(EXIT_FAILURE);
-    }
-
-    // allocate attemptSeq on first iteration
-    if (i == 0) {
-      attemptSeq = (int *)malloc(seqlen * sizeof(int));
-      if (attemptSeq == NULL) {
-        fprintf(stderr, "Error: malloc failed\n");
+      // validate range
+      if (count < 1 || count > digits) {
+        fprintf(stderr, "Error: value %d out of range (1-%d)\n", count, digits);
         exit(EXIT_FAILURE);
       }
+
+      // allocate attemptSeq on first iteration
+      if (i == 0) {
+        attemptSeq = (int *)malloc(seqlen * sizeof(int));
+        if (attemptSeq == NULL) {
+          fprintf(stderr, "Error: malloc failed\n");
+          exit(EXIT_FAILURE);
+        }
+      }
+
+      attemptSeq[i] = count;
+
+      blinkN(gpio, pinLED2, 1);        // red blinks once: acknowledge
+      blinkN(gpio, pinLED,  count);    // green blinks N times: echo
     }
 
-    attemptSeq[i] = count;
-
-    blinkN(gpio, pinLED2, 1);         // red blinks once: acknowledge
-    blinkN(gpio, pinLED,  count);     // green blinks N times: echo
+    blinkN(gpio, pinLED2, 2);          // red blinks twice: end of sequence
   }
 
-  blinkN(gpio, pinLED2, 2);           // red blinks twice: end of sequence
-  }
-  
-    // -------------------------------------------------------
-    // PHASE 2: Main Task: full search
+  // -------------------------------------------------------
+  // PHASE 2: Main Task: full search
 
-    // Print the version of the code this is running; set values in cw2-config.h
-    printf("--------------------- \n");
-    printf(">> Version %d: %s with %d digits and %d sequence length\n", VERSION, VERSION_STR, digits, seqlen);
+  // Print the version of the code this is running; set values in cw2-config.h
+  printf("--------------------- \n");
+  printf(">> Version %d: %s with %d digits and %d sequence length\n", VERSION, VERSION_STR, digits, seqlen);
 #ifdef HAMM_ASM
-    printf(">> HAMM_ASM version: Hamming distance in ARM Assembler\n");
+  printf(">> HAMM_ASM version: Hamming distance in ARM Assembler\n");
 #else
-    printf(">> Hamming in C version\n");
+  printf(">> Hamming in C version\n");
 #endif
-    printf("--------------------- \n");
+  printf("--------------------- \n");
 
-    if (debug) {
-      printf("Debug mode\nThe secret sequence is:");
-      showSeq(theSeq,seqlen);
+  if (debug) {
+    printf("Debug mode\nThe secret sequence is:");
+    showSeq(theSeq, seqlen);
+  }
+
+  // calculate the total range of possible sequences
+  unsigned long bound = powl(digits, seqlen);
+
+  // time-stamp
+  startTime = clock();
+
+  /* ***************************************************************************** */
+  /* implement a check of the Hamming distance of the input and secret sequence    */
+  /* then search for the secret sequence and report where it was found             */
+  /* with -r option, the commandline sequence should be used as input sequence     */
+  /* ***************************************************************************** */
+
+  // use refSeq if provided via -r, otherwise use attemptSeq
+  int *inputSeq;
+  if (opt_r) {
+    inputSeq = refSeq;
+  } else {
+    inputSeq = attemptSeq;
+  }
+
+  // compute and print Hamming distance between input and secret
+  code = hamming(theSeq, inputSeq, seqlen);
+  printf("Hamming distance between input and secret: %d\n", code);
+  showHamm(code, theSeq, inputSeq);
+
+  // allocate candidate sequence
+  int *candidate = (int *)malloc(seqlen * sizeof(int));
+  if (candidate == NULL) {
+    fprintf(stderr, "Error: malloc failed\n");
+    exit(EXIT_FAILURE);
+  }
+
+  // initialise candidate to 111...1
+  for (int i = 0; i < seqlen; i++) {
+    candidate[i] = 1;
+  }
+
+  // brute force search
+  int searching = 1;
+  while (searching) {
+    attempts++;
+
+    // only submit if Hamming distance from inputSeq matches code
+    int candidateHamm = hamming(inputSeq, candidate, seqlen);
+    if (candidateHamm == code) {
+      submits++;
+      int result = submit_PIN(candidate, seqlen, submitDelay);
+      if (result && !found) {
+        found = 1;
+        found_at = attempts;
+        printf("PIN found at attempt %d: ", found_at);
+        showSeq(candidate, seqlen);
+      }
     }
 
-    // calculate the total range of possible sequences
-    unsigned long bound = powl(digits, seqlen);
-
-    // time-stamp
-    startTime = clock();
-
-    // Use refSeq if provided via -r, otherwise use attemptSeq.
-    int *inputSeq;
-
-    // Could possible swap out for ternary.
-    if (opt_r) {
-        inputSeq = refSeq;
-    } else {
-        inputSeq = attemptSeq;
+    // stop if found and not exhaustive
+    if (found && !opt_e) {
+      break;
     }
 
-    code = hamming(theSeq, inputSeq, seqlen);
-    printf("Hamming distance between input and secret: %d\n", code);
-    showHamm(code, theSeq, inputSeq);
+    // increment candidate (111 -> 112 -> 113 -> 121 -> ...)
+    int pos = seqlen - 1;
+    while (pos >= 0) {
+      candidate[pos]++;
+      if (candidate[pos] <= digits) {
+        break;
+      }
+      candidate[pos] = 1;
+      pos--;
+    }
 
-    stopTime = clock();
+    // exhausted all candidates
+    if (pos < 0) {
+      searching = 0;
+    }
+  }
 
-    printf("Runtime; %f secs\n", (stopTime-startTime)/CLOCKS_PER_SEC);
-    printf("Sequence %s\n", found ? "found" : "not found");
-    printf("%s search finished for %d digits and %d seqlen (expect %ld):\n%d attempts (found at %d i.e. %.2f %%), %d submits\n",
-	 (opt_e ? "Exhaustive" : "Non-exhaustive"), digits, seqlen, bound, attempts, found_at, (float)found_at / ((float)bound / 100.0), submits);
-    printf("Secret sequence was: ");
-    showSeq(theSeq,seqlen);
+  free(candidate);
+
+  stopTime = clock();
+
+  // blink green LED twice if found
+  if (found) {
+    blinkN(gpio, pinLED, 2);
+  }
+
+  // show result on LCD
+  if (found) {
+    char lcdMsg[16];
+    lcd_clear(gpio);
+    lcd_write_row(gpio, 0, "PIN found!");
+    lcdMsg[0] = '\0';
+    for (int i = 0; i < seqlen; i++) {
+      char digit[4];
+      snprintf(digit, sizeof(digit), "%d", theSeq[i]);
+      strncat(lcdMsg, digit, sizeof(lcdMsg) - strlen(lcdMsg) - 1);
+    }
+    lcd_write_row(gpio, 1, lcdMsg);
+  }
+
+  printf("Runtime; %f secs\n", (stopTime-startTime)/CLOCKS_PER_SEC);
+  printf("Sequence %s\n", found ? "found" : "not found");
+  printf("%s search finished for %d digits and %d seqlen (expect %ld):\n%d attempts (found at %d i.e. %.2f %%), %d submits\n",
+    (opt_e ? "Exhaustive" : "Non-exhaustive"), digits, seqlen, bound, attempts, found_at,
+    (float)found_at / ((float)bound / 100.0), submits);
+  printf("Secret sequence was: ");
+  showSeq(theSeq, seqlen);
+
+  /* ***************************************************************************** */
+  /* write an exit message to the LCD display                                      */
+  /* ***************************************************************************** */
 
   lcd_clear(gpio);
   lcd_write_row(gpio, 0, "BYE!");
@@ -683,5 +759,5 @@ int main(int argc, char **argv){
   free(theSeq);
   free(refSeq);
 
- return 0;
+  return 0;
 }
