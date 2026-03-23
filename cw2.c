@@ -564,9 +564,8 @@ int main(int argc, char **argv){
 
   // show surname on LCD display.
   lcd_clear(gpio);
-  usleep(5000);        // give LCD time to clear
-  lcd_home(gpio);      // explicitly move cursor to position 0
-  usleep(5000);
+  //usleep(5000);        // give LCD time to clear
+  lcd_home(gpio);      // explicitly move cursor to position 0, we had an issue with this.
   lcd_write_row(gpio, 0, surname);
 
   /* OPTIONAL: wait for ENTER key before continuing */
@@ -580,7 +579,9 @@ int main(int argc, char **argv){
 
   // ...........................................................................
   // Iterate over all elements of the sequence.
-  for (int i = 0; i < seqlen; i++) {
+  if(!opt_r){
+    
+    for (int i = 0; i < seqlen; i++) {
 
     int count = 0;
     timed_out = 0;
@@ -627,6 +628,7 @@ int main(int argc, char **argv){
   }
 
   blinkN(gpio, pinLED2, 2);           // red blinks twice: end of sequence
+  }
   
     // -------------------------------------------------------
     // PHASE 2: Main Task: full search
