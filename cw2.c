@@ -689,6 +689,7 @@ int main(int argc, char **argv){
     printf("Input sequence IS the secret PIN!\n");
   }
 
+  // i.e., if the hamming distance is > 0, but semantically I prefer 'not found'.
   if(!found){
   
     // Allocates a temporary PIN to test.
