@@ -502,11 +502,14 @@ int main(int argc, char **argv){
   lcd_init(gpio);
 
 
+  printf(":P");
+
   if (opt_l) {
-      lcd_init(gpio);
+    printf("Yuh type shi")
       lcd_clear(gpio);
-      lcd_write_row(gpio, 0, "Fuh!");
+      lcd_write_row(gpio, 0, "Hello!");
       lcd_write_row(gpio, 1, "LCD works!");
+      sleep(5);  // keep it on screen for 5 seconds
       exit(2);
   }
 
