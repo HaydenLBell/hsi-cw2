@@ -502,10 +502,8 @@ int main(int argc, char **argv){
   lcd_init(gpio);
 
 
-  printf(":P");
 
   if (opt_l) {
-    printf("Yuh type shi")
       lcd_clear(gpio);
       lcd_write_row(gpio, 0, "Hello!");
       lcd_write_row(gpio, 1, "LCD works!");
@@ -566,6 +564,9 @@ int main(int argc, char **argv){
 
   // show surname on LCD display.
   lcd_clear(gpio);
+  usleep(5000);        // give LCD time to clear
+  lcd_home(gpio);      // explicitly move cursor to position 0
+  usleep(5000);
   lcd_write_row(gpio, 0, surname);
 
   /* OPTIONAL: wait for ENTER key before continuing */
