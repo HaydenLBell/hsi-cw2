@@ -8,13 +8,14 @@
 	@ Entry point (Callable from C): 
 	.global hamming
 	
-hamming:		  @ Input: 2 ptrs to int arrays in R0 and R1, length in R2
+hamming:	  @ Input: 2 ptrs to int arrays in R0 and R1, length in R2
 			  @ don't forget to push relevant registers here
 	@ @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
 	@ ... COMPLETE THIS CODE ...
 	@ @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
 			  @ don't forget to pop relevant registers here
-	BX   LR
+			  @ r0, r1, r2, r3, r4, r5
+	BX   LR   
 
 	LDR r0, =array1      
     LDR r1, =array2      
@@ -53,4 +54,3 @@ check:
 @ Indicate to the linker that the code in this file does not need the stack
 @ to be executable. (Recent versions of GNU ld warn if this is not present.)
 .section .note.GNU-stack,"",%progbits
-	
