@@ -202,6 +202,9 @@ void readSeq(int *seq, int seqlen, int val) {
 /* --------------------------------------------------------------------------- */
 /* Interface fcts on top of the low-level pin I/O code                         */
 
+  // forward declaration
+  static inline void write_LED(volatile uint32_t *gpio, int pin, int value);
+
 /* 
    Blink "led" "c" times
 */
