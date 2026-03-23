@@ -268,7 +268,7 @@ int hamming(const int *x, const int *y, int seqlen) {
 */
 void showHamm(int code, const int *seq1, const int *seq2) {
 
-  printf("Hamming distance:\n%d", code);
+  printf("Hamming distance:\n%d\n", code);
   
 }
 
@@ -313,6 +313,7 @@ int submit_PIN(const int *attSeq, int seqlen, int submitDelay) {
 /* +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++ */
 
 int main(int argc, char **argv){
+
   int found = 0, code = 0, refCode = 0;
   int buttonPressed = 0;
 
@@ -416,10 +417,8 @@ int main(int argc, char **argv){
     printf("Code style requirement: collect the values of the input sequence in the variable attemptSeq; current (unused) value: %p\n", attemptSeq);
   }
 
-  /* ***************************************************************************** */
   /* COMPLETE THIS CODE */
   /* Initialise the sequences that you need here, before using them  */
-  /* ***************************************************************************** */
 
   if (opt_s) { // if -s option is given, use the sequence as SECRET sequence
     if (theSeq==NULL) {
@@ -542,6 +541,10 @@ int main(int argc, char **argv){
   // -----------------------------------------------------------------------------
 
   /* Print Greetings Message on LCD display */
+  ////////////////////////////
+  //       TASK ONE         //
+  ////////////////////////////
+
 
   // first 5 letters of surname
   const char *surname = "KYNOC";
@@ -570,6 +573,10 @@ int main(int argc, char **argv){
 
   // -------------------------------------------------------
   // PHASE 1: sequence input
+
+  ////////////////////////////
+  //       TASK TWO         //
+  ////////////////////////////
 
   // ...........................................................................
   // Iterate over all elements of the sequence
@@ -626,6 +633,7 @@ int main(int argc, char **argv){
   // -------------------------------------------------------
   // PHASE 2: Main Task: full search
 
+
   // Print the version of the code this is running; set values in cw2-config.h
   printf("--------------------- \n");
   printf(">> Version %d: %s with %d digits and %d sequence length\n", VERSION, VERSION_STR, digits, seqlen);
@@ -655,6 +663,7 @@ int main(int argc, char **argv){
 
   // use refSeq if provided via -r, otherwise use attemptSeq
   int *inputSeq;
+
   if (opt_r) {
     inputSeq = refSeq;
   } else {
@@ -666,68 +675,150 @@ int main(int argc, char **argv){
   printf("Hamming distance between input and secret: %d\n", code);
   showHamm(code, theSeq, inputSeq);
 
-  // allocate candidate sequence
-  int *candidate = (int *)malloc(seqlen * sizeof(int));
-  if (candidate == NULL) {
-    fprintf(stderr, "Error: malloc failed\n");
-    exit(EXIT_FAILURE);
+  ////////////////////////////
+  // Task 5 from here down  //
+  ////////////////////////////
+
+  // if the input sequence is the secret PIN
+  if (code == 0) {
+    // input sequence is already the secret PIN
+    found = 1;
+    found_at = 0;
+    submits++;
+    submit_PIN(inputSeq, seqlen, submitDelay);
+    printf("Input sequence IS the secret PIN!\n");
   }
 
-  // initialise candidate to 111...1
-  for (int i = 0; i < seqlen; i++) {
-    candidate[i] = 1;
-  }
+  if(!found){
+  
+    // Allocates a temporary PIN to test.
+    int *candidate = (int *)malloc(seqlen * sizeof(int));
 
-  // brute force search
-  int searching = 1;
-  while (searching) {
-    attempts++;
-
-    // only submit if Hamming distance from inputSeq matches code
-    int candidateHamm = hamming(inputSeq, candidate, seqlen);
-    if (candidateHamm == code) {
-      submits++;
-      int result = submit_PIN(candidate, seqlen, submitDelay);
-      if (result && !found) {
-        found = 1;
-        found_at = attempts;
-        printf("PIN found at attempt %d: ", found_at);
-        showSeq(candidate, seqlen);
-      }
+    if (candidate == NULL) {
+        fprintf(stderr, "Error: malloc failed\n");
+        exit(EXIT_FAILURE);
     }
 
-    // stop if found and not exhaustive
-    if (found && !opt_e) {
-      break;
+    // Allocate array to store the positions we are changing.
+    int *positions = (int *)malloc(code * sizeof(int));
+    if (positions == NULL) {
+        fprintf(stderr, "Error: malloc failed\n");
+        exit(EXIT_FAILURE);
     }
 
-    // increment candidate (111 -> 112 -> 113 -> 121 -> ...)
-    int pos = seqlen - 1;
-    while (pos >= 0) {
-      candidate[pos]++;
-      if (candidate[pos] <= digits) {
-        break;
-      }
-      candidate[pos] = 1;
-      pos--;
+    // Allocate array to track digit values at changed positions.
+    int *values = (int *)malloc(code * sizeof(int));
+    if (values == NULL) {
+        fprintf(stderr, "Error: malloc failed\n");
+        exit(EXIT_FAILURE);
     }
 
-    // exhausted all candidates
-    if (pos < 0) {
-      searching = 0;
+    // Initialises positions to the first combination of positions.
+    for (int i = 0; i < code; i++) {
+        positions[i] = i;
     }
-  }
 
-  free(candidate);
+    // Keep trying until every combination is done.
+    int outer_done = 0;
+    while (!outer_done) {
+
+        
+        for (int i = 0; i < code; i++) {
+            values[i] = 1;
+            // skip the value that matches inputSeq at this position.
+            if (values[i] == inputSeq[positions[i]]) {
+                values[i]++;
+            }
+        }
+
+        int inner_done = 0;
+        while (!inner_done) {
+
+            // build candidate from inputSeq, replacing positions with values
+            for (int i = 0; i < seqlen; i++) {
+                candidate[i] = inputSeq[i];
+            }
+            for (int i = 0; i < code; i++) {
+                candidate[positions[i]] = values[i];
+            }
+
+            // submit this candidate.
+            attempts++;
+            submits++;
+            int result = submit_PIN(candidate, seqlen, submitDelay);
+            if (result && !found) {
+                found = 1;
+                found_at = attempts;
+                printf("PIN found at attempt %d: ", found_at);
+                showSeq(candidate, seqlen);
+            }
+
+            // stop if found and not exhaustive.
+            if (found && !opt_e) {
+                outer_done = 1;
+                break;
+            }
+
+            // increment values (inner counter).
+            // rightmost position increments first, skipping inputSeq value.
+            int vpos = code - 1;
+            while (vpos >= 0) {
+                values[vpos]++;
+                // skip value that matches inputSeq at this position.
+                if (values[vpos] == inputSeq[positions[vpos]]) {
+                    values[vpos]++;
+                }
+                if (values[vpos] <= digits) {
+                    break;
+                }
+                // carry the value by resetting it, so if we go over the maximum its not still increasing.
+                values[vpos] = 1;
+                if (values[vpos] == inputSeq[positions[vpos]]) {
+                    values[vpos]++;
+                }
+                vpos--;
+            }
+            if (vpos < 0) {
+                inner_done = 1;
+            }
+        }
+
+        if (outer_done) break;
+
+        // increment positions (outer counter)
+        // enumerate next combination of `code` positions from seqlen
+        int ppos = code - 1;
+        while (ppos >= 0) {
+            positions[ppos]++;
+            if (positions[ppos] <= seqlen - (code - ppos)) {
+                // fix up positions to the right
+                for (int i = ppos + 1; i < code; i++) {
+                    positions[i] = positions[i-1] + 1;
+                }
+                break;
+            }
+            ppos--;
+        }
+        if (ppos < 0) {
+            outer_done = 1;
+        }
+    }
+
+      // Free memory.
+      free(candidate);
+      free(positions);
+      free(values);
+
+  } 
 
   stopTime = clock();
 
-  // blink green LED twice if found
+  // Blink green LED twice if it is found.
   if (found) {
     blinkN(gpio, pinLED, 2);
   }
 
-  // show result on LCD
+  // Show result on LCD.
   if (found) {
     char lcdMsg[16];
     lcd_clear(gpio);
