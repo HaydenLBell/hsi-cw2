@@ -38,7 +38,7 @@ check:
 	BEQ return
 
 return: 
-	move r0, r3
+	MOV r0, r3
 	BX LR
 
 @ Test data	
