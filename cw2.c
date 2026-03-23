@@ -502,14 +502,14 @@ int main(int argc, char **argv){
   lcd_init(gpio);
 
 
-  if (opt_l) { // TESTING only: show some text on the LCD display to demonstrate it's working in principle
-    /* ***************************************************************************** */
-    /* OPTIONAL CODE to show that the LCD display is working */
-    /* ***************************************************************************** */
-
-    exit(2);
+  if (opt_l) {
+      lcd_init(gpio);
+      lcd_clear(gpio);
+      lcd_write_row(gpio, 0, "Fuh!");
+      lcd_write_row(gpio, 1, "LCD works!");
+      exit(2);
   }
-  
+
   // -----------------------------------------------------------------------------
   // App initialisation
   
