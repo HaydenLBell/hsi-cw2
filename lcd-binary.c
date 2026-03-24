@@ -49,6 +49,14 @@ void pin_mode(volatile uint32_t *gpio, int pin, int mode)
       [mode]      "r" (mode)
     : "r2", "r3", "r4", "r5", "r6"
   );
+
+  // Enable internal pull-down on button pin to prevent floating reads
+  *(gpio + 37) = 1;              // GPPUD = enable pull-down
+  usleep(10);
+  *(gpio + 38) = 1 << pinButton; // GPPUDCLK0 = clock for button pin
+  usleep(10);
+  *(gpio + 37) = 0;              // clear GPPUD
+  *(gpio + 38) = 0;              // clear GPPUDCLK0
 }
 
 /*

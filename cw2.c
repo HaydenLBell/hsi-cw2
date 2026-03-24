@@ -212,7 +212,7 @@ void blinkN(volatile uint32_t *gpio, int led, int c) {
 
   for (int i = 0; i < c; i++) {
     write_LED(gpio, led, 1);
-    usleep(300000);   // On for 300ms. // Check if these are hardcoded in another file brudda.
+    usleep(300000);   // On for 300ms. 
     write_LED(gpio, led, 0);
     usleep(300000);   // Off for 300ms.
   }
@@ -315,7 +315,7 @@ int submit_PIN(const int *attSeq, int seqlen, int submitDelay) {
 int main(int argc, char **argv){
 
   int found = 0, code = 0, refCode = 0;
-  int buttonPressed = 0;
+  //int buttonPressed = 0;
 
   // use these to count: number of comparisons in total, found after how many attempts, total number of submits
   int attempts = 0, found_at = 0, submits = 0;
@@ -823,7 +823,9 @@ int main(int argc, char **argv){
   if (found) {
     char lcdMsg[16];
     lcd_clear(gpio);
+    lcd_home(gpio);
     lcd_write_row(gpio, 0, "PIN found!");
+    usleep(5000000);
     lcdMsg[0] = '\0';
     for (int i = 0; i < seqlen; i++) {
       char digit[4];
@@ -846,6 +848,7 @@ int main(int argc, char **argv){
   /* ***************************************************************************** */
 
   lcd_clear(gpio);
+  lcd_home(gpio);
   lcd_write_row(gpio, 0, "BYE!");
 
   free(theSeq);
