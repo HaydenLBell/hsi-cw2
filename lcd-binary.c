@@ -17,22 +17,32 @@
 void pin_mode(volatile uint32_t *gpio, int pin, int mode)
 {
   __asm__ volatile(
-    "MOV R2, %[gpio_base]    \n\t"  // R2 = gpio base address.
-    "MOV R3, %[pin]          \n\t"  // R3 = pin number.
-    "MOV R4, #10             \n\t"  // R4 = 10 (divisor).
-    "UDIV R5, R3, R4         \n\t"  // R5 = pin / 10 (fsel register index).
-    "MUL R6, R5, R4          \n\t"  // R6 = (pin / 10) * 10.
-    "SUB R6, R3, R6          \n\t"  // R6 = pin % 10.
-    "MOV R4, #3              \n\t"  // R4 = 3.
-    "MUL R6, R6, R4          \n\t"  // R6 = (pin % 10) * 3 = shift amount.
-    "LDR R4, [R2, R5, LSL#2] \n\t"  // R4 = current GPFSEL register value.
-    "MOV R3, #7              \n\t"  // R3 = 0b111 mask.
-    "LSL R3, R3, R6          \n\t"  // shift mask to pin's bit position.
-    "BIC R4, R4, R3          \n\t"  // clear the 3 bits for this pin.
-    "MOV R3, %[mode]         \n\t"  // R3 = mode value.
-    "LSL R3, R3, R6          \n\t"  // shift mode to pin's bit position.
-    "ORR R4, R4, R3          \n\t"  // set the mode bits.
-    "STR R4, [R2, R5, LSL#2] \n\t"  // write back to GPFSEL register.
+    "MOV R2, %[gpio_base]    \n\t"  // R2 = gpio base address
+    "MOV R3, %[pin]          \n\t"  // R3 = pin number
+
+    // Calculate fsel = pin / 10 using shifts and subtracts
+    // Multiply pin by 1/10 approximation: (pin * 205) >> 11
+    "MOV R5, #205            \n\t"  // R5 = magic number for div by 10
+    "MUL R5, R3, R5          \n\t"  // R5 = pin * 205
+    "LSR R5, R5, #11         \n\t"  // R5 = pin / 10 (fsel)
+
+    // Calculate shift = (pin % 10) * 3
+    // pin % 10 = pin - (fsel * 10)
+    "MOV R4, #10             \n\t"  // R4 = 10
+    "MUL R4, R5, R4          \n\t"  // R4 = fsel * 10
+    "SUB R6, R3, R4          \n\t"  // R6 = pin % 10
+    "MOV R4, #3              \n\t"  // R4 = 3
+    "MUL R6, R6, R4          \n\t"  // R6 = (pin % 10) * 3 = shift
+
+    // Read, modify, write the GPFSEL register
+    "LDR R4, [R2, R5, LSL#2] \n\t"  // R4 = current GPFSEL register value
+    "MOV R3, #7              \n\t"  // R3 = 0b111 mask
+    "LSL R3, R3, R6          \n\t"  // shift mask to pin's bit position
+    "BIC R4, R4, R3          \n\t"  // clear the 3 bits for this pin
+    "MOV R3, %[mode]         \n\t"  // R3 = mode value
+    "LSL R3, R3, R6          \n\t"  // shift mode to pin's bit position
+    "ORR R4, R4, R3          \n\t"  // set the mode bits
+    "STR R4, [R2, R5, LSL#2] \n\t"  // write back to GPFSEL register
     :
     : [gpio_base] "r" (gpio),
       [pin]       "r" (pin),
